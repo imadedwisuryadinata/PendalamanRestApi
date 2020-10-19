@@ -2,16 +2,18 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/FadhlanHawali/Digitalent-Kominfo_Pendalaman-Rest-API/service-product/config"
 	"github.com/FadhlanHawali/Digitalent-Kominfo_Pendalaman-Rest-API/service-product/database"
 	"github.com/FadhlanHawali/Digitalent-Kominfo_Pendalaman-Rest-API/service-product/handler"
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
 
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 	"log"
 	"net/http"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 func main() {
@@ -30,8 +32,8 @@ func main() {
 	}
 	menuHandler := handler.Menu{Db: db}
 
-	router.Handle("/add-menu", authMiddleware.ValidateAuth(http.HandlerFunc(menuHandler.AddMenu)))
-	router.Handle("/menu", http.HandlerFunc(menuHandler.GetAllMenu))
+	router.Handle("/add-menu", authMiddleware.ValidateAuthAdmin(menuHandler.AddMenu))
+	router.Handle("/menu", authMiddleware.ValidateAuth(menuHandler.GetAllMenu))
 
 	fmt.Printf("Server listen on :%s", cfg.Port)
 	log.Panic(http.ListenAndServe(fmt.Sprintf(":%s", cfg.Port), router))

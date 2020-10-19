@@ -6,44 +6,51 @@ import (
 )
 
 type Auth struct {
-	ID int `gorm:"primary_key" json:"-"`
+	ID       int    `gorm:"primary_key" json:"-"`
 	Username string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
-	Token string `json:"token,omitempty"`
+	Role     *int   `json:"role,omitempty"`
 }
 
-func Validate (token string, db *gorm.DB) (*Auth,error){
+type TokenDetails struct {
+	AccessToken  string
+	RefreshToken string
+	AtExpires    int64
+	RtExpires    int64
+}
+
+func Validate(token string, db *gorm.DB) (*Auth, error) {
 	var auth Auth
-	if err := db.Where(&Auth{Token: token}).First(&auth).Error;err != nil{
-		if err == gorm.ErrRecordNotFound{
-			return nil,errors.Errorf("invalid token")
-		}
-	}
+	// if err := db.Where(&Auth{Token: token}).First(&auth).Error;err != nil{
+	// 	if err == gorm.ErrRecordNotFound{
+	// 		return nil,errors.Errorf("invalid token")
+	// 	}
+	// }
 
-	return &auth,nil
+	return &auth, nil
 }
 
-func (auth *Auth) SignUp (db *gorm.DB) error{
-	
-	if err := db.Where(&Auth{Username: auth.Username}).First(auth).Error;err != nil{
-		if err == gorm.ErrRecordNotFound{
-			if err := db.Create(auth).Error;err != nil{
+func (auth *Auth) SignUp(db *gorm.DB) error {
+
+	if err := db.Where(&Auth{Username: auth.Username}).First(auth).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			if err := db.Create(auth).Error; err != nil {
 				return err
 			}
-		}else {
+		} else {
 			return err
 		}
 	}
-	
+
 	return nil
 }
 
-func (auth *Auth) Login (db *gorm.DB) (*Auth,error){
-	if err := db.Where(&Auth{Username: auth.Username, Password: auth.Password}).First(auth).Error;err != nil{
-		if err == gorm.ErrRecordNotFound{
-			return nil,errors.Errorf("wrong email/password")
+func (auth *Auth) Login(db *gorm.DB) (*Auth, error) {
+	if err := db.Where(&Auth{Username: auth.Username, Password: auth.Password}).First(auth).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.Errorf("wrong email/password")
 		}
 	}
 
-	return auth,nil
+	return auth, nil
 }
